@@ -17,6 +17,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.yandex.metrica.DeferredDeeplinkListener;
 import com.yandex.metrica.YandexMetrica;
 
 public class AppMetricaModule extends ReactContextBaseJavaModule {
@@ -24,6 +25,8 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
     private static final String TAG = "AppMetricaModule";
 
     private final ReactApplicationContext reactContext;
+
+    private boolean activated = false;
 
     public AppMetricaModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -39,6 +42,7 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
     public void activate(ReadableMap configMap) {
         YandexMetrica.activate(reactContext, Utils.toYandexMetricaConfig(configMap));
         enableActivityAutoTracking();
+        activated = true;
     }
 
     private void enableActivityAutoTracking() {
@@ -98,6 +102,27 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
         YandexMetrica.requestAppMetricaDeviceID(new ReactNativeAppMetricaDeviceIDListener(listener));
     }
 
+    @ReactMethod
+    public void requestDeferredDeeplink(Promise promise) {
+        if (activated) {
+            YandexMetrica.requestDeferredDeeplink(new DeferredDeeplinkListener() {
+                @Override
+                public void onDeeplinkLoaded(String deeplink) {
+                    Log.i("Deeplink", "onDeeplinkLoaded deferredDeeplink = " + deeplink);
+                    promise.resolve(deeplink);
+                }
+
+                @Override
+                public void onError(Error error, String referrer) {
+                    Log.i("Deeplink", "Error: " + error.getDescription() + ", unparsed referrer: " + referrer);
+                    promise.reject(error + " " + error.getDescription(), referrer);
+                }
+            });
+        } else {
+            promise.reject("ERROR: YandexMetrica is not activated", "");
+        }
+    }
+    
     @ReactMethod
     public void resumeSession() {
         YandexMetrica.resumeSession(getCurrentActivity());

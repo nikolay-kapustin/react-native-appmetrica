@@ -73,6 +73,12 @@ RCT_EXPORT_METHOD(requestAppMetricaDeviceID:(RCTResponseSenderBlock)listener)
     [YMMYandexMetrica requestAppMetricaDeviceIDWithCompletionQueue:nil completionBlock:completionBlock];
 }
 
+RCT_EXPORT_METHOD(requestDeferredDeeplink:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    reject(@"DeferredDeeplink null", @"DeferredDeeplink is not supported", nil);
+}
+
 RCT_EXPORT_METHOD(resumeSession)
 {
     [YMMYandexMetrica resumeSession];
