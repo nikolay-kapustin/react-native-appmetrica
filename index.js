@@ -86,6 +86,10 @@ export default {
     AppMetrica.requestAppMetricaDeviceID(listener);
   },
 
+  async requestDeferredDeeplink() {
+    return AppMetrica.requestDeferredDeeplink();
+  },
+
   resumeSession() {
     AppMetrica.resumeSession();
   },
